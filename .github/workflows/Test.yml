@@ -9,6 +9,7 @@ on:
 jobs:
   test-oci:
     runs-on: ubuntu-latest
+    environment: test-oci
 
     steps:
       - name: Checkout Code
