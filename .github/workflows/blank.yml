@@ -41,6 +41,8 @@ jobs:
           chmod 600 ~/.oci/config
 
       - name: Verify Connection
+        env:
+          SUPPRESS_LABEL_WARNING: True
         run: |
           echo "Testing OCI CLI authentication..."
           oci iam region list --output table
