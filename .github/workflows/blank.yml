@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # This allows you to trigger it manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   test-oci:
@@ -14,14 +14,31 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up OCI CLI
-        uses: oracle-actions/setup-oci-cli@v1.1.1
-        with:
-          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
-          user: ${{ secrets.OCI_USER_OCID }}
-          fingerprint: ${{ secrets.OCI_FINGERPRINT }}
-          region: ${{ secrets.OCI_REGION }}
-          key_file: ${{ secrets.OCI_KEY_FILE }}
+      - name: Install OCI CLI
+        run: |
+          python -m pip install --upgrade pip
+          pip install oci-cli
+
+      - name: Configure OCI Authentication
+        run: |
+          mkdir -p ~/.oci
+          
+          # Safely write the private key from secrets
+          cat << 'EOF' > ~/.oci/key.pem
+          ${{ secrets.OCI_KEY_FILE }}
+          EOF
+          chmod 600 ~/.oci/key.pem
+          
+          # Create the OCI config file using secrets
+          cat << EOF > ~/.oci/config
+          [DEFAULT]
+          user=${{ secrets.OCI_USER_OCID }}
+          fingerprint=${{ secrets.OCI_FINGERPRINT }}
+          tenancy=${{ secrets.OCI_TENANCY_OCID }}
+          region=${{ secrets.OCI_REGION }}
+          key_file=/home/runner/.oci/key.pem
+          EOF
+          chmod 600 ~/.oci/config
 
       - name: Verify Connection
         run: |
