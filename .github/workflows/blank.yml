@@ -1,0 +1,29 @@
+name: OCI Connection Test
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # This allows you to trigger it manually from the Actions tab
+
+jobs:
+  test-oci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up OCI CLI
+        uses: oracle-actions/setup-oci-cli@v1.1.1
+        with:
+          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
+          user: ${{ secrets.OCI_USER_OCID }}
+          fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+          region: ${{ secrets.OCI_REGION }}
+          key_file: ${{ secrets.OCI_KEY_FILE }}
+
+      - name: Verify Connection
+        run: |
+          echo "Testing OCI CLI authentication..."
+          oci iam region list --output table
